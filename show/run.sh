@@ -1,3 +1,3 @@
 #!/bin/bash
 
-open recoverysequence.app
+open hexagon.app
