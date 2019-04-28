@@ -281,7 +281,7 @@ class Sample {
 
     fun void load(int index, UGen out) {
         index => _index;
-        "../../ghost-benvox/raw-" + bufSources[index] => _buf.read;
+        "../../../sandbox/ghost-benvox/raw-" + bufSources[index] => _buf.read;
         _env.set(1::ms, 1::ms, 1, 1::ms);
         1 => _shift.mix;
         1 => _buf.phase;
