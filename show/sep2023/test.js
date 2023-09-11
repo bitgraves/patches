@@ -5,9 +5,12 @@
   const sendToRepl = {
     testBitgraves: () => solid(0,0,1),
 
-    initBitgraves: () => {
+    initBitgraves: async () => {
+      await loadScript('https://cdn.jsdelivr.net/npm/hydra-midi@latest/dist/index.js');
+      await midi.start({ input: '*', channel: '*' });
+      await loadScript('https://hydra-extensions.glitch.me/hydra-arithmetics.js');
+      
       s0.initImage('https://storage.googleapis.com/reading-supply-assets/reading.supply.df18bd35-5186-43bb-9eef-176187e37deb.jpeg');
-      pattern = () => src(s0).scale(0.5, 2, 2.6);
 
       scene1 = () => solid(1,0,0).out();
       scene2 = () => solid(0,1,0).out();
