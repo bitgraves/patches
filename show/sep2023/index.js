@@ -8,60 +8,71 @@
     initBitgraves: async () => {
       await loadScript('https://cdn.jsdelivr.net/npm/hydra-midi@latest/dist/index.js');
       await midi.start({ input: '*', channel: '*' });
-      await loadScript('https://hydra-extensions.glitch.me/hydra-arithmetics.js');
 
+      await loadScript('https://hydra-extensions.glitch.me/hydra-arithmetics.js');
+      midi.hide();
+
+      a.setBins(2);
       s0.initImage('https://storage.googleapis.com/reading-supply-assets/reading.supply.df18bd35-5186-43bb-9eef-176187e37deb.jpeg');
       pattern = () => src(s0).scale(0.5, 2, 2.6);
 
-      wrapMainScene = (sceneFn, scaleBeforeAdd = false) => {
+      _offset = 0;
+      _offsetLerp = 0;
+      update = () => {
+        _offsetLerp += (_offset - _offsetLerp) * 0.1;
+      };
+      tt = () => Math.max(0, time * (1.0 + _offsetLerp));
+      ttl = (l = 60, lo = 0, hi = 1) => (lo + (hi - lo) * Math.min(1.0, (tt() / l)));
+      ttls = (l = 60, lo = 0, hi = 1) => (lo + (hi - lo) * Math.min(1.0, (tt() / l) * (tt() / l)));
+
+      wrapMainScene = (sceneFn) => {
         choo.state.hydra.hydra.synth.time = 0; // reset time
-        if (scaleBeforeAdd) {
-          sceneFn()
-            .scale(1,0.6,1)
-            .add(src(o0).mult(cc(9).range(0,0.96)))
-            .mult(cc(14))
-            .luma(0.5)
-            .out()
-        } else {
-          sceneFn()
-            .add(src(o0).mult(cc(9).range(0,0.96)))
-            .scale(1,0.6,1)
-            .mult(cc(14))
-            .luma(0.5)
-            .out()
-        }
+        _offset = 0;
+        _offsetLerp = 0;
+        
+        sceneFn()
+          .mult(cc(14))
+          .out()
       };
 
       baikal1 = () => {
-        scaleBigNoise = () => cc(3).range(0,1).value((v) => (v > 0.4) ? ((v - 0.4) / 0.6) : 0);
-        return shape(2, () => 0.005 + a.fft[0] * 0.07)
-          .repeat(1, cc(3).range(1,3))
-          .modulateRotate(noise(cc(3).range(0.1,4), 0.2).mult(cc(3).range(0,0.75)))
-          .scrollY(0, cc(3).range(0,3))
-          .modulateRotate(noise(30, scaleBigNoise()).mult(scaleBigNoise()))
-          .rotate(scaleBigNoise())
-          .repeat(2,2)
-          .mult(() => 0.8 + a.fft[0] * 0.3);
+        LEN = 150;
+        return shape(2, () => 0.01 + a.fft[0] * 0.1)
+          .modulate(noise(2, () => ttls(LEN,1,5)), () => ttl(LEN,0,0.3))
+          .diff(
+            shape(2, () => 0.01 + a.fft[0] * 0.1)
+              .modulate(noise(2.5, () => ttls(LEN,1,5)), () => ttl(LEN,0,0.3))
+          )
+          .scrollX(0, () => ttls(LEN,0,4))
+          .scale(1,0.6,1)
+          .add(src(o0).mult(0.8).scale(1.01, 1, 1.1));
       };
 
       baikal2 = () => {
+        LEN = 150; // TODO
         return pattern().scrollY(() => Math.sin(time * 0.1) * 0.75)
           .mult(pattern().scrollX(() => time / 20))
           .scale(2.8)
           .modulateRotate(noise(8), 0.1)
           .modulateScale(osc(100).mult(0.08).rotate(3.14/2))
           .modulateRepeatY(osc(10).mult(() => a.fft[1] * 0.1))
-          .repeat(4,4)
+          .repeat(() => ttl(LEN,2,4), () => ttl(LEN,2,4))
           .modulateScale(osc().mult(() => a.fft[1] * 0.1))
-          .add(src(o0).color(0,0.5,0.5).mult(() => a.fft[1] * 0.7));
+          .mask(shape(64,0,2.5))
+          .scale(1,0.6,1)
+          .add(src(o0).color(0.6,0.85,1).scale(1.005).mult(() => 0.2 + a.fft[1] * 0.8))
       };
 
       bigfish = () => {
-        return pattern().repeat(2).modulateKaleid(osc(2).mult(cc(3)), 2)
-          .mult(pattern().repeat(4).scrollX(() => Math.sin(time * 0.1) * 4))
-          .modulateScale(osc(20).pixelate(80, 80).mult(() => a.fft[1] * 0.1).mult(cc(3))) // fft wobble
-          .modulateScale(shape(3).scale(1.5, 1.5).modulateRotate(osc(5)), cc(3))
-          .mult(noise(40, 1).thresh(0.7).add(cc(14)).add(() => a.fft[0] * 0.5).pixelate(100, 100));
+        LEN = 240;
+        return pattern().repeat(2).modulateKaleid(osc(2).mult(() => ttl(LEN)), 2)
+          .mult(pattern().repeat(4).scrollX(() => Math.sin(time * 0.1) * ttl(120,0.2,4)))
+          .modulateScale(osc(20).pixelate(80, 80).mult(() => a.fft[1] * 0.1).mult(() => ttl(LEN))) // fft wobble
+          .modulateScale(shape(3).scale(1.5, 1.5).modulateRotate(osc(5)), () => ttl(LEN))
+          .mult(noise(40, 1).thresh(0.7).add(() => ttl(60)).add(() => a.fft[0] * 0.5).pixelate(100, 100))
+          .scale(1,0.6,1)
+          .luma(0.5)
+          .add(src(o0).mult(() => a.fft[1] * 0.4));
       };
 
       pluck2 = () => {
@@ -73,16 +84,21 @@
               .modulateScale(osc(2).mult(cc(3)), 2, 0.1)
           )
           .mult(() => 0.8 + a.fft[0] * 0.3)
-        // .add(src(o0).mult(cc(9)))
-          .diff(src(o0).mult(cc(3).range(0,1)).scale(0.5));
+          .add(src(o0).mult(cc(9)))
+          .diff(src(o0).mult(cc(3).range(0,1)).scale(0.5))
+          .scale(1,0.6,1)
+          .luma(0.5);
       };
 
       baaka = () => {
         return pattern().scrollY(() => Math.sin(time * 0.1) * 0.75)
           .mask(shape(32, 0.8))
-          .modulate(noise(50, () => a.fft[1] * 0.0001).pixelate(200,200), cc(3).range(0.01,0.2))
+          .modulate(noise(50, () => a.fft[1] * 0.0001).pixelate(200,200), () => 0.02 + Math.cos(tt() / 40) * 0.2)
           .modulateScale(osc(3).mult(0.2))
         // .add(src(o0).color(0,0.5,0.5).mult(() => a.fft[1] * 0.7))
+          .scale(1,0.6,1)
+          .add(src(o0).mult(cc(9).range(0,0.96)))
+          .luma(0.5);
       };
 
       murmur = () => {
@@ -95,6 +111,9 @@
           )
           .modulateScrollY(voronoi(() => 3 + Math.sin(time * 0.01), 0.1),() => 1 + Math.sin(time / 10) * 0.5)
           .mult(() => 0.5 + a.fft[0] * 0.6)
+          .scale(1,0.6,1)
+          .add(src(o0).mult(cc(9).range(0,0.96)))
+          .luma(0.5);
       };
 
       unicorn = () => {
@@ -105,7 +124,10 @@
           )
           .modulateScale(voronoi(4),cc(3).range(0,0.6))
           .mult(() => 0.8 + a.fft[0] * 0.3)
-          .color(cc(3).range(1,0.1));
+          .color(cc(3).range(1,0.1))
+          .scale(1,0.6,1)
+          .add(src(o0).mult(cc(9).range(0,0.97)))
+          .luma(0.5);
       };
 
 
@@ -133,12 +155,8 @@
 
       mpd218.onNote(36, prevScene);
       mpd218.onNote(37, nextScene);
-      /* mpd218.onNote(40, () => wrapMainScene(baikal1));
-         mpd218.onNote(41, () => wrapMainScene(baikal2));
-         mpd218.onNote(42, () => wrapMainScene(bigfish));
-         mpd218.onNote(43, () => wrapMainScene(pluck2));
-         mpd218.onNote(44, () => wrapMainScene(murmur, true));
-         mpd218.onNote(45, () => wrapMainScene(unicorn, true)); */
+      mpd218.onNote(38, () => (_offset -= 0.05));
+      mpd218.onNote(39, () => (_offset += 0.05));
 
       test().out();
     },
