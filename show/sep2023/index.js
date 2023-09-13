@@ -92,14 +92,20 @@
       };
 
       baaka = () => {
+        LEN = 240;
         return pattern().scrollY(() => Math.sin(time * 0.1) * 0.75)
           .mask(shape(32, 0.8))
-          .modulate(noise(50, () => a.fft[1] * 0.0001).pixelate(200,200), () => 0.02 + Math.cos(tt() / 40) * 0.2)
+          .modulateScale(
+            osc(20, () => 0.01 + a.fft[0] * 0.001).rotate(3.14/2),
+            0.05
+          )
+          .modulate(
+            noise(50, () => a.fft[1] * 0.001).pixelate(200,200), () => 0.02 + Math.cos(tt() / 40) * (0.15 + ttl(LEN, 0, 0.2))
+          )
           .modulateScale(osc(3).mult(0.2))
-        // .add(src(o0).color(0,0.5,0.5).mult(() => a.fft[1] * 0.7))
+          .mult(() => ttl(120, 0.1, 0.8))
           .scale(1,0.6,1)
-          .add(src(o0).mult(cc(9).range(0,0.96)))
-          .luma(0.5);
+          .add(src(o0).mask(shape(16, 0, () => a.fft[0]).mult(0.8)));
       };
 
       murmur = () => {
