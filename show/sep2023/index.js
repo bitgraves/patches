@@ -103,18 +103,24 @@
       };
 
       murmur = () => {
+        INTRO = 60;
+        LEN = 150;
         return pattern().scrollX(0,0.03).repeat(4,4)
           .diff(pattern().repeat(4,4).scale(1.02).scrollX(0,0.04).scrollY(0,-0.1))
+          .mult(() => Math.max(ttl(INTRO), Math.min(1, a.fft[0] * 0.5)))
           .mask(
             noise(() => 5 - 1.2 * a.fft[0], () => 0.25 + a.fft[0] * 0.002).sub(0.1).thresh(0.6)
               .scale(() => 0.9 + a.fft[1] * 0.05)
-              .modulatePixelate(osc(10, () => a.fft[1]).add(cc(3).range(1,0)), 50)
+              .modulatePixelate(osc(10, () => a.fft[1]).add(() => 1 - ttl(INTRO)), 50)
           )
           .modulateScrollY(voronoi(() => 3 + Math.sin(time * 0.01), 0.1),() => 1 + Math.sin(time / 10) * 0.5)
-          .mult(() => 0.5 + a.fft[0] * 0.6)
+          .diff(
+            src(o0).repeatY(4).color(1.05,0.8,1.05)
+              .mult(osc(20,0.2)).modulateScale(osc(16).rotate(3.14/2).mult(() => a.fft[0] * 0.05)).mult(() => ttls(LEN))
+          )
+          .luma(0.1)
           .scale(1,0.6,1)
-          .add(src(o0).mult(cc(9).range(0,0.96)))
-          .luma(0.5);
+          .add(src(o0).mult(() => ttl(LEN) * 0.6).scale(() => 1.0005 + ttl(LEN) * 0.005));
       };
 
       unicorn = () => {
