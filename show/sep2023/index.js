@@ -117,17 +117,19 @@
       };
 
       unicorn = () => {
+        waveCos = () => 0.5 + (Math.cos(tt() / 20) * 0.5);
+        waveSin = () => 0.5 + (Math.sin(tt() / 20) * 0.5);
         return pattern().scrollX(0,0.03).repeat(4,4)
           .mult(
-            shape(2, 0.1).modulateRotate(osc(32), 1).modulateRotate(noise(32), cc(3).range(16,2))
-              .diff(shape(2, cc(3).range(0,0.1)).modulateRotate(osc(16), 1).modulateRotate(noise(16), cc(3).range(8,1)))
+            shape(2, 0.1).modulateRotate(osc(32), 1).modulateRotate(noise(() => 32 + a.fft[0] * 0.3), () => 2 + waveCos() * 14)
+              .diff(shape(2, () => waveSin() * 0.1).modulateRotate(osc(16), 1).modulateRotate(noise(16), () => 1 + waveCos() * 7))
           )
-          .modulateScale(voronoi(4),cc(3).range(0,0.6))
+          .modulateScale(voronoi(4),() => waveSin() * 0.6)
           .mult(() => 0.8 + a.fft[0] * 0.3)
-          .color(cc(3).range(1,0.1))
+          .color(() => 1.0 - ttls(240))
+          .mask(shape(32, () => ttl(120, 0, 2), () => ttl(120, 0.2, 0.7)))
           .scale(1,0.6,1)
-          .add(src(o0).mult(cc(9).range(0,0.97)))
-          .luma(0.5);
+          .add(src(o0).scale(0.99).mult(() => 0.2 + a.fft[0] * 0.4));
       };
 
 
