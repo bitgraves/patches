@@ -12,7 +12,10 @@
       await loadScript('https://hydra-extensions.glitch.me/hydra-arithmetics.js');
       midi.hide();
 
+      _aScale = 10;
       a.setBins(2);
+      a.setScale(_aScale);
+      
       s0.initImage('https://storage.googleapis.com/reading-supply-assets/reading.supply.df18bd35-5186-43bb-9eef-176187e37deb.jpeg');
       pattern = () => src(s0).scale(0.5, 2, 2.6);
 
@@ -173,6 +176,8 @@
       mpd218.onNote(37, nextScene);
       mpd218.onNote(38, () => (_offset -= 0.05));
       mpd218.onNote(39, () => (_offset += 0.05));
+      mpd218.onNote(40, () => (_aScale /= 0.75; _aScale = Math.min(40, _aScale); a.setScale(_aScale))); // bigger scale, less sensitive mic
+      mpd218.onNote(41, () => (_aScale *= 0.75; _aScale = Math.max(5.625, _aScale); a.setScale(_aScale))); // smaller scale, more sensitive mic
 
       test().out();
     },
