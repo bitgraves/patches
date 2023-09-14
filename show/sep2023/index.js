@@ -31,6 +31,7 @@
         _offsetLerp = 0;
         
         sceneFn()
+          .modulateScrollY(noise(200, 2), cc(15).range(0,0.9))
           .mult(cc(14))
           .out()
       };
