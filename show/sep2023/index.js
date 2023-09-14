@@ -176,8 +176,8 @@
       mpd218.onNote(37, nextScene);
       mpd218.onNote(38, () => (_offset -= 0.05));
       mpd218.onNote(39, () => (_offset += 0.05));
-      mpd218.onNote(40, () => (_aScale /= 0.75; _aScale = Math.min(40, _aScale); a.setScale(_aScale))); // bigger scale, less sensitive mic
-      mpd218.onNote(41, () => (_aScale *= 0.75; _aScale = Math.max(5.625, _aScale); a.setScale(_aScale))); // smaller scale, more sensitive mic
+      mpd218.onNote(40, () => { _aScale /= 0.75; _aScale = Math.min(40, _aScale); a.setScale(_aScale) }); // bigger scale, less sensitive mic
+      mpd218.onNote(41, () => { _aScale *= 0.75; _aScale = Math.max(5.625, _aScale); a.setScale(_aScale) }); // smaller scale, more sensitive mic
 
       test().out();
     },
