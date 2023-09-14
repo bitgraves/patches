@@ -76,19 +76,19 @@
       };
 
       pluck2 = () => {
-        LEN = 180 // TODO
-        return pattern().scrollX(0,() => ttl(LEN,0.03,2)).repeat(4,4)
-          .diff(pattern().repeat(4,4).scale(1.02).scrollX(0, () => -0.04 - ttl(LEN,0,0.96)).scrollY(0,-0.1))
+        LEN = 180;
+        bgrepeat = () => 4 - ttl(LEN,0,2);
+        return pattern().scrollX(0,() => ttls(LEN,0.03,2)).repeat(bgrepeat,bgrepeat)
+          .diff(pattern().repeat(bgrepeat,bgrepeat).scale(1.02).scrollX(0, () => -0.04 - ttls(LEN,0,0.96)).scrollY(0,-0.1))
           .add(
             shape(3).scale(1,0.5,2).repeat(8,1)
               .modulateScale(noise(20, 1).mult(() => a.fft[0] * 0.02))
               .modulateScale(osc(2).mult(() => ttls(LEN)), 2, 0.1)
           )
           .mult(() => 0.8 + a.fft[0] * 0.3)
-          .add(src(o0).mult(() => ttls(LEN)).color(1,0.75,0.2))
-          .diff(src(o0).mult(() => ttl(LEN + 30)).scale(0.5))
+          .diff(src(o0).mult(() => ttl(LEN + 30, 0, 0.9)).scale(0.5))
           .scale(1,0.6,1)
-          .luma(0.5);
+          .add(src(o0).mult(() => ttls(LEN, 0, 0.5) + a.fft[1] * 0.3).color(1,0.75,0.2));
       };
 
       baaka = () => {
