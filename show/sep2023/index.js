@@ -142,7 +142,7 @@
           .color(() => 1.0 - ttls(240))
           .mask(shape(32, () => ttl(120, 0, 2), () => ttl(120, 0.2, 0.7)))
           .scale(1,0.6,1)
-          .add(src(o0).scale(0.99).mult(() => 0.2 + a.fft[0] * 0.4));
+          .add(src(o0).scale(0.99).mult(() => 0.2 + a.fft[0] * ttl(180, 0.4, 0.6)));
       };
 
 
