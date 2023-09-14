@@ -88,7 +88,7 @@
           .mult(() => 0.8 + a.fft[0] * 0.3)
           .diff(src(o0).mult(() => ttl(LEN + 30, 0, 0.9)).scale(0.5))
           .scale(1,0.6,1)
-          .add(src(o0).mult(() => ttls(LEN, 0, 0.5) + a.fft[1] * 0.3).color(1,0.75,0.2));
+          .add(src(o0).mult(() => ttls(LEN, 0, 0.5) + a.fft[1] * ttls(LEN,0.1,0.3)).color(1,0.75,0.2));
       };
 
       baaka = () => {
