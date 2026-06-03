@@ -12,41 +12,68 @@
              await loadScript('/extensions/hydra-nonlinear-time.js')
              await midi.start({ input: '*', channel: '*' }) */
 
-      _aScale = 10;
-      a.setBins(2);
-      a.setScale(_aScale);
+          const mpd218 = midi.input(0).channel(9);
+          let _hit = 0; // set when pad touched in patch
+          
+          _aScale = 10;
+          a.setBins(2);
+          a.setScale(_aScale);
 
-      s0.initImage("/assets/BITGRAVES_Final_2048_V02_04.jpg");
-      pattern = () => src(s0).scale(0.5, 2, 2.6);
+          s0.initImage("/assets/BITGRAVES_Final_2048_V02_04.jpg");
+          pattern = () => src(s0).scale(0.5, 2, 2.6);
 
-      _offset = 0;
-      _offsetLerp = 0;
-      update = () => {
-        _offsetLerp += (_offset - _offsetLerp) * 0.1;
-      };
-      tt = () => Math.max(0, time * (1.0 + _offsetLerp));
-      ttl = (l = 60, lo = 0, hi = 1) => (lo + (hi - lo) * Math.min(1.0, (tt() / l)));
-      ttls = (l = 60, lo = 0, hi = 1) => (lo + (hi - lo) * Math.min(1.0, (tt() / l) * (tt() / l)));
+          let _offset = 0;
+          let _offsetLerp = 0;
+          
+          update = () => {
+              _offsetLerp += (_offset - _offsetLerp) * 0.1;
+              _hit += (0 - _hit) * 0.003; // lerp hit
+          };
+          tt = () => Math.max(0, time * (1.0 + _offsetLerp));
+          ttl = (l = 60, lo = 0, hi = 1) => (lo + (hi - lo) * Math.min(1.0, (tt() / l)));
+          ttls = (l = 60, lo = 0, hi = 1) => (lo + (hi - lo) * Math.min(1.0, (tt() / l) * (tt() / l)));
 
-      wrapMainScene = (sceneFn) => {
-        choo.state.hydra.hydra.synth.time = 0; // reset time
-        _offset = 0;
-        _offsetLerp = 0;
-        
-        sceneFn()
-          .modulateScrollY(noise(200, 2), cc(15).range(0,0.9))
-          .mult(cc(14))
-          .out()
-      };
+          wrapMainScene = (sceneFn) => {
+              // choo.state.hydra.hydra.synth.time = 0; // reset time
+              _offset = 0;
+              _offsetLerp = 0;
+              
+              sceneFn()
+                  .modulateScrollY(noise(200, 2), cc(15).range(0,0.9))
+                  .mult(cc(14))
+                  .out()
+          };
 
-      wake1 = () => {
-          return shape(2);
-      };
-      wake2 = () => {
-          return shape(4);
-      };
+          wake1 = () => {
+              console.log(`wake1`);
+              mpd218.onNote(51, () => { _hit = .25 });
+              return shape(2,() => (.1 + _hit * 2)).repeatY(20).scrollY(0,.04)
+                  .sub(noise(400).mult(.02))
+                  .mask(shape(4,cc(9).range(.5,1)))
+                  .scrollY(0,() => (_hit))
+                  .modulateScale(noise(.5,.1),cc(3).value((v) => v + _hit * 10))
+                  .scale(1,.6,1)
+                  .modulate(sharpen(o0,.08).scale(1.1).scrollY(() => Math.cos(time/3),.1))
+                  .modulate(noise(1,() => _hit).mult(() => 3 * _hit));
+          };
+          wake2 = () => {
+              console.log(`wake2`);
+              return shape(2,.1).repeatY(50).scrollY(0,.04)
+                  .sub(noise(400).mult(.02))
+                  .modulateRotate(voronoi(12).mask(shape(16,0.5,1)),cc(3).range(0,3.14 * 2))
+                  .scrollX(0,.04)
+                  .mask(shape(16,cc(3).range(2,.5),.5))
+                  .modulateScale(
+                      noise(10,.15).pixelate(5,5)
+                          .diff(noise(10,1).pixelate(4.9,4.9))
+                          .thresh(.88),
+                      cc(3).range(0,100)
+                  )
+                  .add(osc(4,5).color(1,0,0).mult(cc(9).range(0,0.85)))
+                  .scale(1,.6,1)
+                  .modulatePixelate(sharpen(o0,.08).scale(1.1).scrollX(() => Math.cos(time/3),.1),10,cc(13).range(100,3));
+          };
 
-      const mpd218 = midi.input(0).channel(9);
       mpd218.onNote('*', () => {});
       test = () => solid(1,0,0);
 
