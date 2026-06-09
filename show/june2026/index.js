@@ -73,12 +73,24 @@
                   .scale(1,.6,1)
                   .modulatePixelate(sharpen(o0,.08).scale(1.1).scrollX(() => Math.cos(time/3),.1),10,cc(13).range(100,3));
           };
+          sleep2 = () => {
+              console.log(`sleep2`);
+              return shape(4,.9).repeat(20,20).invert()
+                  .modulatePixelate(noise().pixelate(),cc(9).value((v) => 1 + (a.fft[0] * v * 100))) // glitch
+                  .modulateRotate(voronoi(10,1).pixelate(40,40).rotate(3.14 * 0.25),3.14*2)
+                  .modulateScale(shape(() => a.fft[0] * 32,0,.9).modulateScale(shape(32,0,.9)),10)
+                  .mask(shape(32,.66,cc(3).value((v) => .2 + a.fft[0] * v * 2)))
+                  .mask(shape(32,.66).mult(cc(9).range(1,0)).invert())
+                  .scale(1,.6,1)
+                  .diff(src(o0).color(1.2,-0.7,1).mult(cc(12)))
+                  .modulate(src(o0).scrollY(() => Math.cos(time/3)),.1);
+          };
 
       mpd218.onNote('*', () => {});
       test = () => solid(1,0,0);
 
       gSceneIndex = 0;
-      setlist = [wake1, wake2];
+      setlist = [wake1, wake2, sleep2];
 
       nextScene = () => {
         if (gSceneIndex == setlist.length - 1) gSceneIndex = 0;
