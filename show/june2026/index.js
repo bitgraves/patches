@@ -27,7 +27,7 @@
           
           update = () => {
               _offsetLerp += (_offset - _offsetLerp) * 0.1;
-              _hit += (0 - _hit) * 0.003; // lerp hit
+              _hit = _hit * 0.99;
           };
           tt = () => Math.max(0, time * (1.0 + _offsetLerp));
           ttl = (l = 60, lo = 0, hi = 1) => (lo + (hi - lo) * Math.min(1.0, (tt() / l)));
@@ -46,15 +46,22 @@
 
           wake1 = () => {
               console.log(`wake1`);
-              mpd218.onNote(51, () => { _hit = .25 });
-              return shape(2,() => (.1 + _hit * 2)).repeatY(20).scrollY(0,.04)
-                  .sub(noise(400).mult(.02))
-                  .mask(shape(4,cc(9).range(.5,1)))
-                  .scrollY(0,() => (_hit))
-                  .modulateScale(noise(.5,.1),cc(3).value((v) => v + _hit * 10))
+              mpd218.onNote(51, () => { _hit = 1 });
+
+              return src(s0)
+                  .modulate(blur(s0).modulate(voronoi(),0.05),.02)
+                  .add(solid(1,1,1).mult(cc(3).range(1,0)))
+                  .mask(
+                      shape(2,() => (.1 + _hit * 0.5)).repeatY(20).scrollY(0,.04)
+                          .sub(noise(400).mult(.02))
+                          .mask(shape(4,cc(9).range(.5,1)))
+                          .scrollY(() => _hit * 100)
+                          .modulateScale(noise(.5,.1),cc(3).value((v) => v + _hit * 2.5))
+                          .modulateScale(shape(4,0,.8).modulateScale(shape(32,0,.8)),20)
+                  )
                   .scale(1,.6,1)
                   .modulate(sharpen(o0,.08).scale(1.1).scrollY(() => Math.cos(time/3),.1))
-                  .modulate(noise(1,() => _hit).mult(() => 3 * _hit));
+                  .modulate(noise(1,() => _hit * 0.25).mult(() => 0.75 * _hit));
           };
           wake2 = () => {
               console.log(`wake2`);
