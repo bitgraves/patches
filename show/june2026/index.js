@@ -50,14 +50,14 @@
 
               return src(s0)
                   .modulate(blur(s0).modulate(voronoi(),0.05),.02)
-                  .add(solid(1,1,1).mult(cc(3).range(1,0)))
+                  .add(solid(1,1,1).mult(cc(12).range(1,0)))
                   .mask(
-                      shape(2,() => (.1 + _hit * 0.5)).repeatY(20).scrollY(0,.04)
+                      shape(2,() => (.1 + _hit * 0.5 + a.fft[0] * .4)).repeatY(40).scrollY(0,.04)
                           .sub(noise(400).mult(.02))
-                          .mask(shape(4,cc(3).range(.5,.9)))
+                          .mask(shape(4,cc(12).range(.5,.9)))
                           .scrollY(() => _hit * 100)
                           .modulateScale(noise(.5,.1),cc(3).value((v) => v + _hit * 2.5))
-                          .modulateScale(shape(4,0,.8).modulateScale(shape(32,0,.8)),20)
+                          .modulateScale(shape(4,.2,.5).modulateScale(shape(32,0,.9)).scale(1.5),20)
                   )
                   .scale(1,.6,1)
                   .modulate(sharpen(o0,.08).scale(1.1).scrollY(() => Math.cos(time/3),.1))
@@ -65,6 +65,7 @@
           };
           wake2 = () => {
               console.log(`wake2`);
+
               return shape(2,.1).repeatY(50).scrollY(0,.04)
                   .sub(noise(400).mult(.02))
                   .modulateRotate(voronoi(12).mask(shape(16,0.5,1)),() => 3.14 * (1 + Math.sin(time / 15)))
@@ -76,7 +77,7 @@
                           .thresh(.88),
                       cc(3).range(0.1,100)
                   )
-                  .add(osc(4,5).color(1,0,0).mult(cc(9).range(0,0.85)))
+                  .add(osc(4,5).scale(1,0.5,1).thresh(cc(9).range(1.05,0.2)).color(0.98,0.12,0).modulateScrollX(noise(),.02))
                   .scale(1,.6,1)
                   .modulatePixelate(sharpen(o0,.08).scale(1.1).scrollX(() => Math.cos(time/3),.1),10,cc(3).range(100,3));
           };
@@ -90,7 +91,7 @@
                   )
                   .scale(1,.6,1)
                   .add(
-                      src(o0).modulateScale(noise(200),.02).mult(cc(13).value((v) => (0.9 + v * 1.08) + a.fft[0] * .1))
+                      src(o0).modulateScale(noise(200),.02).mult(cc(12).value((v) => (0.9 + v * 1.08) + a.fft[0] * .1))
                           .rotate(0.001)
                   )
                   .add(src(o0).mask(shape(2,.01).scrollY(0,-.05)).mult(.4))
@@ -103,10 +104,10 @@
                   .modulateRotate(voronoi(10,1).pixelate(40,40).rotate(3.14 * 0.25),3.14*2)
                   .modulateScale(shape(() => a.fft[0] * 32,0,.9).modulateScale(shape(32,0,.9)),10)
                   .mask(shape(32,.66,cc(3).value((v) => .2 + a.fft[0] * v * 2)))
-                  .mask(shape(32,.66).mult(cc(12).range(1,0)).invert())
+                  .mask(shape(32,.66).mult(cc(12).value((v) => Math.max(0,1 - v * 2))).invert())
                   .scale(1,.6,1)
                   .diff(src(o0).color(1.2,-0.7,1).mult(cc(12)))
-                  .modulate(src(o0).scrollY(() => Math.cos(time/3)),.1);
+                  .modulate(src(o0).scrollY(() => Math.cos(time/3)),.001);
           };
 
       mpd218.onNote('*', () => {});
