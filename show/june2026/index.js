@@ -27,7 +27,7 @@
           
           update = () => {
               _offsetLerp += (_offset - _offsetLerp) * 0.1;
-              _hit = _hit * 0.99;
+              _hit = _hit * 0.998;
           };
           tt = () => Math.max(0, time * (1.0 + _offsetLerp));
           ttl = (l = 60, lo = 0, hi = 1) => (lo + (hi - lo) * Math.min(1.0, (tt() / l)));
@@ -48,34 +48,28 @@
               console.log(`wake1`);
               mpd218.onNote(51, () => { _hit = 1 });
 
-              return src(s0)
-                  .modulate(blur(s0).modulate(voronoi(),0.05),.02)
-                  .add(solid(1,1,1).mult(cc(12).range(1,0)))
-                  .mask(
-                      shape(2,() => (.1 + _hit * 0.5 + a.fft[0] * .4)).repeatY(40).scrollY(0,.04)
-                          .sub(noise(400).mult(.02))
-                          .mask(shape(4,cc(12).range(.5,.9)))
-                          .scrollY(() => _hit * 100)
-                          .modulateScale(noise(.5,.1),cc(3).value((v) => v + _hit * 2.5))
-                          .modulateScale(shape(4,.2,.5).modulateScale(shape(32,0,.9)).scale(1.5),20)
-                  )
-                  .scale(1,.6,1)
-                  .modulate(sharpen(o0,.08).scale(1.1).scrollY(() => Math.cos(time/3),.1))
-                  .modulate(noise(1,() => _hit * 0.25).mult(() => 0.75 * _hit));
+              return shape(2,() => .1 + _hit * .5)
+                .modulateRotate(noise(12).pixelate(2,2),cc(3).value((v) => 0.3 + ((_hit + v) * 3.14 * 2)))
+                .mult(src(s0).brightness(cc(12).range(2,0.5)))
+                .repeatY(64)
+                .scrollY(0,0)
+                .mask(shape(2,0.1,1))
+                .modulateScale(voronoi(100,cc(3).range(1,10)).mask(shape(2,0,1).invert()),() => a.fft[0])
+                .add(src(o0).modulateScrollY(noise(200).add(.2),.01).mult(() => .4 + (_hit * .599)));
           };
           wake2 = () => {
               console.log(`wake2`);
 
-              return shape(2,.1).repeatY(50).scrollY(0,.04)
+              return shape(2,() => 0.01 + a.fft[1] * 1.5).repeatY(50)
                   .sub(noise(400).mult(.02))
-                  .modulateRotate(voronoi(12).mask(shape(16,0.5,1)),() => 3.14 * (1 + Math.sin(time / 15)))
+                  .modulateRotate(voronoi(12).mask(shape(16,0.5,1)),cc(3).value((v) => Math.max(0,v-0.5)*2))
                   .scrollX(0,.04)
-                  .mask(shape(16,() => 1.25 + 0.75 * Math.cos(time / 14),.5))
+                  .mask(shape(16,cc(3).value((v) => 2 - Math.max(0,v-0.5)*2.5),.5))
                   .modulateScale(
                       noise(10,.15).pixelate(5,5)
                           .diff(noise(10,1).pixelate(4.9,4.9))
                           .thresh(.88),
-                      cc(3).range(0.1,100)
+                      cc(3).range(0.5,100)
                   )
                   .add(osc(4,5).scale(1,0.5,1).thresh(cc(9).range(1.05,0.2)).color(0.98,0.12,0).modulateScrollX(noise(),.02))
                   .scale(1,.6,1)
